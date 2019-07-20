@@ -1,0 +1,35 @@
+version: "3.5"
+
+services:
+  redis:
+    image: redis #TODO: lock a version
+    container_name: redis-db
+    ports:
+      - "7001:6379"
+    networks:
+      - redis
+
+  proxy-redis:
+    image: proxy-redis:1.0
+    container_name: proxy
+    command: java -jar proxy-redis-1.0-SNAPSHOT.jar server redis-app.yml
+    ports:
+      - "8080:8080"
+    networks:
+      - redis
+    depends_on:
+      - redis
+
+  proxy-test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    command: mvn test # source/scripts/test.sh
+    container_name: proxy-test
+    networks:
+      - redis
+    depends_on:
+      - redis
+
+networks:
+  redis:
