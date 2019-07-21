@@ -1,4 +1,4 @@
-package com.amehta.proxy.redis.interact.api;
+package com.amehta.proxy.redis.interact;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
