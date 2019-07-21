@@ -6,7 +6,6 @@ import org.junit.Test;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
-
 import javax.ws.rs.core.Response;
 import java.util.concurrent.ExecutionException;
 
@@ -32,9 +31,9 @@ public class RedisAppResourceIntegrationTest {
         */
         pool = new JedisPool(redisAddress, redisPort);
         CachedRedisService cachedRedisService = new CachedRedisService(pool, 2, 1, 1);
-        resource =  new RedisAppResource(cachedRedisService);
+        resource = new RedisAppResource(cachedRedisService);
         pool = new JedisPool(redisAddress, redisPort);
-        try(Jedis resource = pool.getResource()) {
+        try (Jedis resource = pool.getResource()) {
             resource.set("k1", "v1");
         }
     }

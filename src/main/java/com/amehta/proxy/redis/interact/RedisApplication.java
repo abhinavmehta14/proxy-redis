@@ -1,7 +1,6 @@
 package com.amehta.proxy.redis.interact;
 
 import com.amehta.proxy.redis.interact.health.TemplateHealthCheck;
-import com.google.common.cache.LoadingCache;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -10,13 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
 
-import java.util.Optional;
-
 
 public class RedisApplication extends Application<RedisConfiguration> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisApplication.class);
-    private static CachedRedisService cachedRedisService;
+
+    public static void main(String[] args) throws Exception {
+        new RedisApplication().run(args);
+    }
 
     @Override
     public String getName() {
@@ -33,7 +33,6 @@ public class RedisApplication extends Application<RedisConfiguration> {
         return new JedisPool(config, redisAddress, redisPort);
     }
 
-
     @Override
     public void run(RedisConfiguration configuration,
                     Environment environment) {
@@ -48,10 +47,10 @@ public class RedisApplication extends Application<RedisConfiguration> {
 
         JedisPool jedisPool = getJedisPool(redisAddress, redisPort, jedisPoolSize);
         CachedRedisService cachedRedisService = new CachedRedisService(
-            jedisPool,
-            cacheSize,
-            cacheTimeout,
-            cacheConcurrency
+                jedisPool,
+                cacheSize,
+                cacheTimeout,
+                cacheConcurrency
         );
 
         final RedisAppResource resource = new RedisAppResource(
@@ -63,10 +62,6 @@ public class RedisApplication extends Application<RedisConfiguration> {
 
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(resource);
-    }
-
-    public static void main(String[] args) throws Exception {
-        new RedisApplication().run(args);
     }
 
 }

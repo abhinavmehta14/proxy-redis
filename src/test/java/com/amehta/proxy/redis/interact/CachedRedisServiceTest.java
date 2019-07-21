@@ -19,13 +19,12 @@ import static org.mockito.Mockito.*;
 public class CachedRedisServiceTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(CachedRedisServiceTest.class);
-
+    private static int cacheTimeout = 5;
     private CachedRedisService cachedRedisService;
     private JedisPool jedisPool = mock(JedisPool.class);
     private Jedis jedis = mock(Jedis.class);
     private ImmutablePair<String, String> kv1 = ImmutablePair.of("k1", "v1");
     private ImmutablePair<String, String> kv2 = ImmutablePair.of("k2", "v2");
-    private static int cacheTimeout = 5;
 
     @Before
     public void setUp() {
@@ -67,7 +66,7 @@ public class CachedRedisServiceTest {
         // cacheSize is set to 1
         Optional<String> v1 = cachedRedisService.getValue(kv1.getKey());
         Optional<String> v2 = cachedRedisService.getValue(kv2.getKey());
-        Optional<String> v1Again =  cachedRedisService.getValue(kv1.getKey());
+        Optional<String> v1Again = cachedRedisService.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
         assertEquals(kv2.getValue(), v2.get());
         assertEquals(kv1.getValue(), v1Again.get());
