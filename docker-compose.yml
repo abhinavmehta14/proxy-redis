@@ -21,6 +21,9 @@ services:
       - redis
 
   proxy-test:
+  ## TODO:
+  # maven is downloading dependencies on each run
+  # figure out a way to share the local .m2 directory onto docker
     build:
       context: .
       dockerfile: Dockerfile.test

@@ -12,6 +12,9 @@ public class RedisConfiguration extends Configuration {
     private Integer cacheSize;
 
     @NotNull
+    private Integer cacheConcurrency;
+
+    @NotNull
     private Integer cacheTimeout;
 
     @NotEmpty
@@ -29,6 +32,11 @@ public class RedisConfiguration extends Configuration {
     @JsonProperty
     public int getCacheSize() {
         return this.cacheSize;
+    }
+
+    @JsonProperty
+    public int getCacheConcurrency() {
+        return this.cacheConcurrency;
     }
 
     @JsonProperty

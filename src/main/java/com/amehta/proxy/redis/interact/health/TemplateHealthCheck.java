@@ -4,6 +4,8 @@ import com.codahale.metrics.health.HealthCheck;
 
 public class TemplateHealthCheck extends HealthCheck {
 
+    // TODO: Figure out how to use this
+
     public TemplateHealthCheck() {
     }
 

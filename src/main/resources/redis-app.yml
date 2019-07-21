@@ -23,7 +23,7 @@ logging:
 redisPort: 6379
 redisAddress: redis-db
 cacheSize: 1024
-cacheTimeout: 3600 # in seconds
-threadPoolSize: 32 # setup based on number of available cores #TODO: use this
-jedisPoolSize: 32 # proportional to threadPoolSize #TODO: use this
-
+cacheTimeout: 60 # in seconds
+threadPoolSize: 32 # setup based on number of available cores
+jedisPoolSize: 32 # proportional to threadPoolSize
+cacheConcurrency: 32 # decides number segments in Guava cache to help with contention
