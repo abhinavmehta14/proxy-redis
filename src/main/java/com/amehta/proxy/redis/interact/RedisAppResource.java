@@ -33,7 +33,7 @@ public class RedisAppResource {
     @Timed
     public Response get(@QueryParam("key") String key) throws ExecutionException {
         String val;
-        if(key == null)
+        if (key == null)
             return Response
                     .status(Response.Status.BAD_REQUEST)
                     .entity("key is null")
@@ -41,7 +41,7 @@ public class RedisAppResource {
 
         val = getValueFromCache(key);
 
-        if(val == null)
+        if (val == null)
             return Response
                     .status(Response.Status.NOT_FOUND)
                     .entity("key not found")

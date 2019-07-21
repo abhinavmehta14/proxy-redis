@@ -25,13 +25,13 @@ public class CachedRedisService {
         this.cache = getCache(cacheSize, cacheTimeout, cacheConcurrency);
     }
 
-     /* Initialize a guava cache with below params from config
-        1. maximum size
-        2. key expiry time
-        3. concurrency level to parallelize writes
-       TODO: Any redis insert or update should invalidate cache
-       Note that the cache is setup to cache the knowledge that a key is missing
-    */
+    /* Initialize a guava cache with below params from config
+       1. maximum size
+       2. key expiry time
+       3. concurrency level to parallelize writes
+      TODO: Any redis insert or update should invalidate cache
+      Note that the cache is setup to cache the knowledge that a key is missing
+   */
     LoadingCache<String, Optional<String>> getCache(int cacheSize, int cacheTimeout, int cacheConcurrency) {
         CacheLoader<String, Optional<String>> loader = new CacheLoader<String, Optional<String>>() {
             @Override
@@ -53,7 +53,7 @@ public class CachedRedisService {
     }
 
     private String getValueFromRedis(String key) {
-        try(Jedis connection = jedisPool.getResource()) {
+        try (Jedis connection = jedisPool.getResource()) {
             return connection.get(key);  // case sensitive lookup
         }
     }
