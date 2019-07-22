@@ -13,7 +13,7 @@ A runtime setup requires - `docker`, `docker-compose`, `bash`, `make`.
 
 Once you have such a setup run,
 ```shell
-git clone git@github.com:abhinavmehta14/proxy-redis.git)
+git clone git@github.com:abhinavmehta14/proxy-redis.git
 cd proxy-redis
 ```
 
@@ -21,16 +21,15 @@ cd proxy-redis
 ```shell
 make run
 ```
-
-To access logs from proxy service,
+This stops any running containers and spins up a Redis DB and a Webserver container. To access Webserver logs,
 ```shell
 docker-compose exec proxy-redis /bin/bash
 tail -f logs/*
 ```
 
-Logs are appended to two files
+Logs are appended in two separate files,
 - `logs/proxy-redis-request.log` contains request logs
-- `proxy-redis.log` contains application logs
+- `logs/proxy-redis.log` contains application logs
 
 To stop and remove all running containers,
 ```shell
@@ -43,9 +42,8 @@ TODO
 ```
 
 #### Admin and Metrics Endpoint 
-This spins up a Redis DB and a Webserver container. If things are working as expected one should be able to access,
-- <http://localhost:8080/admin/> which is admin dashboard for Webserver 
-- <http://localhost:8080/admin/metrics?pretty=true> which is useful to monitor the Webserver e.g. `timers` shows metrics for each endpoint
+- <http://localhost:8080/admin/> is admin dashboard for Webserver
+- <http://localhost:8080/admin/metrics?pretty=true> is useful to monitor the Webserver e.g. `timers` shows useful metrics like `min`, `max`, `t99`, `stddev` etc for each endpoint
 - <http://localhost:8080/admin/threads> shows various threads Webserver is running and their state
 
 #### GET Endpoint
@@ -72,6 +70,9 @@ OK
 localhost:7001> get a1
 "b1"
 ```
+
+#### Adding Key, Value Pairs to Redis
+Inline with requirements, key value pairs can be added to Redis at by appending them in `RedisAppResourceIntegrationTest.initRedisStore` followed by `make test`. These pairs are persisted in DB until `docker-compose rm` or `docker-compose rm redis` is executed.
 
 ### Run Tests
 ```shell
@@ -101,9 +102,3 @@ A new build triggered only if all tests pass.
 
 ## Architecture
 TODO: Architecture diagram
-
-
-
-
-   
-   
