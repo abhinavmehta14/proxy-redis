@@ -14,6 +14,10 @@ EXPOSE 8080/tcp
 WORKDIR /code/proxy-redis
 
 # add jar and config
-ADD target/proxy-redis-1.0-SNAPSHOT.jar . 
+ADD artifact/proxy-redis-1.0-SNAPSHOT.jar . 
 ADD src/main/resources/redis-app.yml . 
 RUN mkdir logs
+
+# cleanup local FS target dir maps to artifact directory on local FS
+# TODO: below command is not working
+# RUN rm -r target/* 

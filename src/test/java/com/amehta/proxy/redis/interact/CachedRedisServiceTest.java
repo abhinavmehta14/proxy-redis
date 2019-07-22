@@ -79,9 +79,9 @@ public class CachedRedisServiceTest {
         // sleep for more than cacheTimeout
         Optional<String> v1 = cachedRedisService.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
-        long sleepTime = (cacheTimeout + 2) * 1000L;
-        LOGGER.info(format("About to sleep for %d millis to test cache timeout", sleepTime));
-        Thread.sleep(sleepTime);
+        int sleepTime = cacheTimeout + 2;
+        LOGGER.info(format("About to sleep for %d seconds to test cache timeout", sleepTime));
+        Thread.sleep(sleepTime * 1000L);
         Optional<String> v1Again = cachedRedisService.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
         assertEquals(kv1.getValue(), v1Again.get());

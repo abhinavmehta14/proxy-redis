@@ -20,16 +20,29 @@ services:
     depends_on:
       - redis
 
+  proxy-build:
+    image: proxy-redis:1.0
+    build:
+      context: .
+      dockerfile: Dockerfile.build
+    container_name: proxy-build
+    volumes:
+      - $PWD/artifact:/code/proxy-redis/target
+
   proxy-test: # run maven based tests and build a fat jar
     build:
       context: .
       dockerfile: Dockerfile.test
-    command: mvn package
+    command: mvn package # use -DskipTests=true here if there is genuie reason to skip tests
     container_name: proxy-test
     networks:
       - redis
     volumes:
+      # Below is to speed up maven build on a re-run
       - ~/.m2:/root/.m2
+      # Below is to copy fat jar to local filesystem
+      # TODO: change fat jar location (likely a setting in pom.xml) so that it can be sync'ed to artifact directory ignoring other files in target/
+      - $PWD/artifact:/code/proxy-redis/target
     depends_on:
       - redis
 
