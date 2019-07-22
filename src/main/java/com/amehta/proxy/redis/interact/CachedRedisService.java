@@ -17,8 +17,8 @@ import static java.lang.String.format;
 public class CachedRedisService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CachedRedisService.class);
-    private static JedisPool jedisPool;
-    private static LoadingCache<String, Optional<String>> cache;
+    private JedisPool jedisPool;
+    private LoadingCache<String, Optional<String>> cache;
 
     public CachedRedisService(JedisPool jedisPool, int cacheSize, int cacheTimeout, int cacheConcurrency) {
         this.jedisPool = jedisPool;
