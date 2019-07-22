@@ -80,7 +80,7 @@ public class CachedRedisServiceTest {
         Optional<String> v1 = cachedRedisService.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
         long sleepTime = (cacheTimeout + 2) * 1000L;
-        LOGGER.info(format("About to sleep for %d millis", sleepTime));
+        LOGGER.info(format("About to sleep for %d millis to test cache timeout", sleepTime));
         Thread.sleep(sleepTime);
         Optional<String> v1Again = cachedRedisService.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());

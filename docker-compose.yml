@@ -20,17 +20,16 @@ services:
     depends_on:
       - redis
 
-  proxy-test:
-  ## TODO:
-  # maven is downloading dependencies on each run
-  # figure out a way to share the local .m2 directory onto docker
+  proxy-test: # run maven based tests and build a fat jar
     build:
       context: .
       dockerfile: Dockerfile.test
-    command: mvn test # source/scripts/test.sh
+    command: mvn package
     container_name: proxy-test
     networks:
       - redis
+    volumes:
+      - ~/.m2:/root/.m2
     depends_on:
       - redis
 

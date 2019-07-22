@@ -1,5 +1,8 @@
 server:
   type: simple
+  maxThreads: 32 # making this parameter explicit with default value to start with
+  minThreads: 8 # making this parameter explicit with default value to start with
+  maxQueuedRequests: 1024 # making this parameter explicit with default value to start with
   applicationContextPath: /
   connector:
     type: http
