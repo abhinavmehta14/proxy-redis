@@ -6,6 +6,8 @@ RUN ln -s /lib/libc.musl-x86_64.so.1 /lib/ld-linux-x86-64.so.2
 
 # add bash to run wrapper shell scripts
 RUN apk add bash
+# add curl to help with basic testing
+RUN apk --no-cache add curl
 
 # expose port
 EXPOSE 8080/tcp

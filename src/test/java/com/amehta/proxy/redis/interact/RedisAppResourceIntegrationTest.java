@@ -31,7 +31,7 @@ public class RedisAppResourceIntegrationTest {
         */
         pool = new JedisPool(redisAddress, redisPort);
         CachedRedisService cachedRedisService = new CachedRedisService(pool, 2, 1, 1);
-        resource = new RedisAppResource(cachedRedisService);
+        resource = new RedisAppResource(cachedRedisService, null);
         pool = new JedisPool(redisAddress, redisPort);
         try (Jedis resource = pool.getResource()) {
             resource.set("k1", "v1");
