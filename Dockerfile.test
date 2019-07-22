@@ -3,9 +3,8 @@ FROM maven:3.6.1-jdk-8
 
 WORKDIR /code/proxy-redis
 
-
 # copy code in docker image
 ADD . .
 
 # delete previous artifact
-RUN rm -r artifact/*
+RUN rm -r artifact/* || true

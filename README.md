@@ -9,19 +9,29 @@ This repo is to interact with a [Redis](https://redis.io/) Datastore. Currently,
 
 # Development
 ## Running Proxy Service
-A runtime setup requires - `docker`, `docker-compose`, `bash`, `make`.
-
-Once you have such a setup run,
+### Prerequisites
+A runtime setup requires - `docker`, `docker-compose`, `bash`, `make`. Execute `docker login` for ability to pull public images. Clone repo with commands below
 ```shell
 git clone git@github.com:abhinavmehta14/proxy-redis.git
 cd proxy-redis
 ```
 
-### To run / stop service
+### Run Tests
+```shell
+make test
+```
+This executes the below steps in they are mentioned,
+1. Builds a docker image with mvn and code base
+2. Runs Maven based tests, loads Redis store with key value pairs specified in `RedisAppResourceIntegrationTest.initRedisStore`
+3. A new build is triggered only if all tests pass
+
+### Run Service
+Below command stops existing proxy container and spins up a new Webserver container
 ```shell
 make run
 ```
-This stops any running containers and spins up a Redis DB and a Webserver container. To access Webserver logs,
+
+To access Webserver logs,
 ```shell
 docker-compose exec proxy-redis /bin/bash
 tail -f logs/*
@@ -31,15 +41,152 @@ Logs are appended in two separate files,
 - `logs/proxy-redis-request.log` contains request logs
 - `logs/proxy-redis.log` contains application logs
 
-To stop and remove all running containers,
-```shell
-make stop
-```
-
 To watch Redis metrics or stats,
 ```shell
-TODO
+ amehta@localhost 16:12:06:~ > redis-cli -h localhost -p 7001
+localhost:7001> info
+# Server
+redis_version:5.0.5
+redis_git_sha1:00000000
+redis_git_dirty:0
+redis_build_id:f5cc35eb8e511133
+redis_mode:standalone
+os:Linux 4.9.93-linuxkit-aufs x86_64
+arch_bits:64
+multiplexing_api:epoll
+atomicvar_api:atomic-builtin
+gcc_version:8.3.0
+process_id:1
+run_id:b91ff0f2fcdb172b6e0f22409b388344f74edcf2
+tcp_port:6379
+uptime_in_seconds:471
+uptime_in_days:0
+hz:10
+configured_hz:10
+lru_clock:3556042
+executable:/data/redis-server
+config_file:
+
+# Clients
+connected_clients:1
+client_recent_max_input_buffer:2
+client_recent_max_output_buffer:0
+blocked_clients:0
+
+# Memory
+used_memory:854480
+used_memory_human:834.45K
+used_memory_rss:5484544
+used_memory_rss_human:5.23M
+used_memory_peak:915312
+used_memory_peak_human:893.86K
+used_memory_peak_perc:93.35%
+used_memory_overhead:841198
+used_memory_startup:791240
+used_memory_dataset:13282
+used_memory_dataset_perc:21.00%
+allocator_allocated:1423640
+allocator_active:1708032
+allocator_resident:10895360
+total_system_memory:12575707136
+total_system_memory_human:11.71G
+used_memory_lua:37888
+used_memory_lua_human:37.00K
+used_memory_scripts:0
+used_memory_scripts_human:0B
+number_of_cached_scripts:0
+maxmemory:0
+maxmemory_human:0B
+maxmemory_policy:noeviction
+allocator_frag_ratio:1.20
+allocator_frag_bytes:284392
+allocator_rss_ratio:6.38
+allocator_rss_bytes:9187328
+rss_overhead_ratio:0.50
+rss_overhead_bytes:-5410816
+mem_fragmentation_ratio:6.75
+mem_fragmentation_bytes:4672064
+mem_not_counted_for_evict:0
+mem_replication_backlog:0
+mem_clients_slaves:0
+mem_clients_normal:49694
+mem_aof_buffer:0
+mem_allocator:jemalloc-5.1.0
+active_defrag_running:0
+lazyfree_pending_objects:0
+
+# Persistence
+loading:0
+rdb_changes_since_last_save:18
+rdb_bgsave_in_progress:0
+rdb_last_save_time:1563836659
+rdb_last_bgsave_status:ok
+rdb_last_bgsave_time_sec:-1
+rdb_current_bgsave_time_sec:-1
+rdb_last_cow_size:0
+aof_enabled:0
+aof_rewrite_in_progress:0
+aof_rewrite_scheduled:0
+aof_last_rewrite_time_sec:-1
+aof_current_rewrite_time_sec:-1
+aof_last_bgrewrite_status:ok
+aof_last_write_status:ok
+aof_last_cow_size:0
+
+# Stats
+total_connections_received:7
+total_commands_processed:22
+instantaneous_ops_per_sec:0
+total_net_input_bytes:663
+total_net_output_bytes:14857
+instantaneous_input_kbps:0.00
+instantaneous_output_kbps:0.00
+rejected_connections:0
+sync_full:0
+sync_partial_ok:0
+sync_partial_err:0
+expired_keys:0
+expired_stale_perc:0.00
+expired_time_cap_reached_count:0
+evicted_keys:0
+keyspace_hits:1
+keyspace_misses:1
+pubsub_channels:0
+pubsub_patterns:0
+latest_fork_usec:0
+migrate_cached_sockets:0
+slave_expires_tracked_keys:0
+active_defrag_hits:0
+active_defrag_misses:0
+active_defrag_key_hits:0
+active_defrag_key_misses:0
+
+# Replication
+role:master
+connected_slaves:0
+master_replid:0109335829ce22c0f27f90bd26ae0a69dad3cb35
+master_replid2:0000000000000000000000000000000000000000
+master_repl_offset:0
+second_repl_offset:-1
+repl_backlog_active:0
+repl_backlog_size:1048576
+repl_backlog_first_byte_offset:0
+repl_backlog_histlen:0
+
+# CPU
+used_cpu_sys:1.680000
+used_cpu_user:0.380000
+used_cpu_sys_children:0.000000
+used_cpu_user_children:0.000000
+
+# Cluster
+cluster_enabled:0
+
+# Keyspace
+db0:keys=5,expires=0,avg_ttl=0
 ```
+
+Note that the above method assumes you have redis-cli setup
 
 #### Admin and Metrics Endpoint 
 - <http://localhost:8080/admin/> is admin dashboard for Webserver
@@ -53,7 +200,7 @@ One can access the GET endpoint as <http://localhost:8080/v1.0/proxy?key=[KEY]>,
 - http code=404 if key is not found in Redis DB or Cache
 
 #### POST Endpoint
-This is a backdoor to add key value pairs to Redis. Sample request
+This is a backdoor (not part of requirements) to add key value pairs to Redis. Sample request
 ```shell
 curl -i -XPOST 'http://localhost:8080/v1.0/proxy?key=a5&value=b5'; echo
 ```
@@ -72,21 +219,39 @@ localhost:7001> get a1
 ```
 
 #### Adding Key, Value Pairs to Redis
-Inline with requirements, key value pairs can be added to Redis at by appending them in `RedisAppResourceIntegrationTest.initRedisStore` followed by `make test`. These pairs are persisted in DB until `docker-compose rm` or `docker-compose rm redis` is executed.
+Inline with requirements, key value pairs can be added to Redis at by appending them in `RedisAppResourceIntegrationTest.initRedisStore` followed by `make test` which ensures pairs are set in Redis. These pairs are persisted in DB until `docker-compose rm` or `docker-compose rm redis` is executed.
 
-### Run Tests
+
+### Stop Service
+To stop and remove all running containers including data on Redis,
 ```shell
-make test
+ > make stop
+docker-compose stop
+Stopping proxy    ... done
+Stopping redis-db ... done
+docker-compose rm
+Going to remove proxy, proxy-redis_redis_run_1, proxy-redis_proxy-test_run_4, proxy-redis_proxy-test_run_3, proxy-redis_proxy-test_run_2, proxy-redis_proxy-test_run_1, redis-db
+Are you sure? [yN] y
+Removing proxy                        ... done
+Removing proxy-redis_redis_run_1      ... done
+Removing proxy-redis_proxy-test_run_4 ... done
+Removing proxy-redis_proxy-test_run_3 ... done
+Removing proxy-redis_proxy-test_run_2 ... done
+Removing proxy-redis_proxy-test_run_1 ... done
+Removing redis-db                     ... done
 ```
-First builds a docker image with mvn and code base. It then runs Maven based tests.
 
-
-### Build
-This is required to build code a new image out of the code in the directory.
+To stop Webserver container only,
 ```shell
-make build
+docker-compose stop proxy-redis
 ```
-A new build triggered only if all tests pass.
+
+## Run Everything
+To bring up Redis store, run tests, build webserver image, start Webserver one can invoke the below command
+```shell
+make all
+```
+This combines all the make tasks.
 
 
 ## TODOs
