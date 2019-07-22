@@ -33,14 +33,25 @@ public class RedisAppResourceIntegrationTest {
         CachedRedisService cachedRedisService = new CachedRedisService(pool, 2, 1, 1);
         resource = new RedisAppResource(cachedRedisService, null);
         pool = new JedisPool(redisAddress, redisPort);
-        try (Jedis resource = pool.getResource()) {
-            resource.set("k1", "v1");
-        }
+        initRedisStore(pool);
     }
 
     @After
     public void tearDown() {
         pool.close();
+    }
+
+    private void initRedisStore(JedisPool pool) {
+        // add key values you would like to initialize DB with
+        try (Jedis resource = pool.getResource()) {
+            resource.set("k1", "v1");
+            // add more key values
+            resource.set("a1", "b1");
+            resource.set("a2", "b2");
+            resource.set("a3", "b3");
+            resource.set("a4", "b4");
+            resource.set("a4", "b4");
+        }
     }
 
     @Test
