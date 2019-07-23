@@ -10,7 +10,10 @@ This repo is to interact with a [Redis](https://redis.io/) Datastore. Currently,
 # Development
 ## Running Proxy Service
 ### Prerequisites
-A runtime setup requires - `docker`, `docker-compose`, `bash`, `make`. Execute `docker login` for ability to pull public images. Clone repo with commands below
+- A runtime setup requires - `docker`, `docker-compose`, `bash`, `make`
+- Execute `docker login` for ability to pull public images. Clone repo with commands below
+- Webserver runs on port 8080 and Redis is exposed on 7001. Make sure these two ports are available or change ports in `Dockerfile.build` and `resources/redis-app.yml`
+- Clone repo and change directory
 ```shell
 git clone git@github.com:abhinavmehta14/proxy-redis.git
 cd proxy-redis
@@ -30,6 +33,7 @@ Below command stops existing proxy container and spins up a new Webserver contai
 ```shell
 make run
 ```
+Note that, above command requires at least one execution of `make test` before `make run` to generate image for Webserver. The Webserver is not yet pulled from Docker cloud yet.
 
 To access Webserver logs,
 ```shell
