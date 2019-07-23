@@ -17,6 +17,9 @@ public class RedisConfiguration extends Configuration {
     @NotNull
     private Integer cacheTimeout;
 
+    @NotNull
+    private Integer globalExpiry;
+
     @NotEmpty
     private String redisAddress;
 
@@ -24,7 +27,10 @@ public class RedisConfiguration extends Configuration {
     private Integer redisPort;
 
     @NotNull
-    private Integer jedisPoolSize;
+    private Integer jedisReadPoolSize;
+
+    @NotNull
+    private Integer jedisWritePoolSize;
 
     @NotNull
     private Integer threadPoolSize;
@@ -45,6 +51,11 @@ public class RedisConfiguration extends Configuration {
     }
 
     @JsonProperty
+    public int getGlobalExpiry() {
+        return this.globalExpiry;
+    }
+
+    @JsonProperty
     public String getRedisAddress() {
         return redisAddress;
     }
@@ -55,13 +66,18 @@ public class RedisConfiguration extends Configuration {
     }
 
     @JsonProperty
-    public int getJedisPoolSize() {
-        return this.threadPoolSize;
+    public int getJedisReadPoolSize() {
+        return this.jedisReadPoolSize;
+    }
+
+    @JsonProperty
+    public int getJedisWritePoolSize() {
+        return this.jedisReadPoolSize;
     }
 
     @JsonProperty
     public int getThreadPoolSize() {
-        return threadPoolSize;
+        return this.threadPoolSize;
     }
 
     // TODO: setters - might be useful with tests
