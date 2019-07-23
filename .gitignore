@@ -2,3 +2,5 @@
 artifact/*
 logs/*
 target
+
+!artifact/.gitkeep
