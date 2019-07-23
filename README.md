@@ -263,6 +263,9 @@ This combines all the make tasks.
 - Allocate memory / cpu for Docker containers
 - Integration tests to send concurrent requests and assert response http code. Imitate `scripts/curl_test_concurrent.sh` for this
 - Read `globalExpiry` from config in `RedisAppResourceIntegrationTest`
+- High Consistency when we are running only single redis container
+- Test to validate config. Such errors are showing up on runtime currently
+- Impose timeout on DB Read / Write calls
 
 ### Future work
 - Log cache hit / miss metrics periodically

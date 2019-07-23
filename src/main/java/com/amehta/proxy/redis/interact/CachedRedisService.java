@@ -61,4 +61,9 @@ public class CachedRedisService {
     public Optional<String> getValue(String key) throws ExecutionException {
         return cache.get(key);
     }
+
+    public void invalidateCache(String key) {
+        LOGGER.info(format("invalidating guava cache for key=%s", key));
+        cache.invalidate(key);
+    }
 }
