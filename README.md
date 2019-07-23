@@ -1,11 +1,16 @@
 # Proxy Redis Service
 
-This repo is to interact with a [Redis](https://redis.io/) Datastore. Currently,
+This service is to interact with a [Redis](https://redis.io/) Datastore via HTTP. Setup is meant to be scalable and handle concurrent requests. Service uses the below building blocks,
  - Webserver is based on [Dropwizard](https://www.dropwizard.io/1.0.0/docs/getting-started.html), a Java framework for developing RESTful web apps
  - Exposes a HTTP GET endpoint to perform read operations from Redis
  - Exposes a HTTP POST endpoint, a backdoor to perform write operation to Redis
  - Caches `<key,value>` pairs into a [Guava](https://github.com/google/guava/wiki) based LRU cache
- - System offers eventual consistency, low availability in it's current form
+
+System in it's current form offers,
+1. Eventual Consistency
+2. Not Highly Available (HA)
+
+HA can be offered with current setup with minor changes.
 
 ## Development - Running Proxy Service
 ### Prerequisites
@@ -46,96 +51,11 @@ Logs are appended in two separate files,
 
 To watch Redis metrics or stats,
 ```shell
- amehta@localhost 16:12:06:~ > redis-cli -h localhost -p 7001
+> redis-cli -h localhost -p 7001
 localhost:7001> info
 # Server
 redis_version:5.0.5
-redis_git_sha1:00000000
-redis_git_dirty:0
-redis_build_id:f5cc35eb8e511133
-redis_mode:standalone
-os:Linux 4.9.93-linuxkit-aufs x86_64
-arch_bits:64
-multiplexing_api:epoll
-atomicvar_api:atomic-builtin
-gcc_version:8.3.0
-process_id:1
-run_id:b91ff0f2fcdb172b6e0f22409b388344f74edcf2
-tcp_port:6379
-uptime_in_seconds:471
-uptime_in_days:0
-hz:10
-configured_hz:10
-lru_clock:3556042
-executable:/data/redis-server
-config_file:
-
-# Clients
-connected_clients:1
-client_recent_max_input_buffer:2
-client_recent_max_output_buffer:0
-blocked_clients:0
-
-# Memory
-used_memory:854480
-used_memory_human:834.45K
-used_memory_rss:5484544
-used_memory_rss_human:5.23M
-used_memory_peak:915312
-used_memory_peak_human:893.86K
-used_memory_peak_perc:93.35%
-used_memory_overhead:841198
-used_memory_startup:791240
-used_memory_dataset:13282
-used_memory_dataset_perc:21.00%
-allocator_allocated:1423640
-allocator_active:1708032
-allocator_resident:10895360
-total_system_memory:12575707136
-total_system_memory_human:11.71G
-used_memory_lua:37888
-used_memory_lua_human:37.00K
-used_memory_scripts:0
-used_memory_scripts_human:0B
-number_of_cached_scripts:0
-maxmemory:0
-maxmemory_human:0B
-maxmemory_policy:noeviction
-allocator_frag_ratio:1.20
-allocator_frag_bytes:284392
-allocator_rss_ratio:6.38
-allocator_rss_bytes:9187328
-rss_overhead_ratio:0.50
-rss_overhead_bytes:-5410816
-mem_fragmentation_ratio:6.75
-mem_fragmentation_bytes:4672064
-mem_not_counted_for_evict:0
-mem_replication_backlog:0
-mem_clients_slaves:0
-mem_clients_normal:49694
-mem_aof_buffer:0
-mem_allocator:jemalloc-5.1.0
-active_defrag_running:0
-lazyfree_pending_objects:0
-
-# Persistence
-loading:0
-rdb_changes_since_last_save:18
-rdb_bgsave_in_progress:0
-rdb_last_save_time:1563836659
-rdb_last_bgsave_status:ok
-rdb_last_bgsave_time_sec:-1
-rdb_current_bgsave_time_sec:-1
-rdb_last_cow_size:0
-aof_enabled:0
-aof_rewrite_in_progress:0
-aof_rewrite_scheduled:0
-aof_last_rewrite_time_sec:-1
-aof_current_rewrite_time_sec:-1
-aof_last_bgrewrite_status:ok
-aof_last_write_status:ok
-aof_last_cow_size:0
-
+...
 # Stats
 total_connections_received:7
 total_commands_processed:22
@@ -163,33 +83,9 @@ active_defrag_hits:0
 active_defrag_misses:0
 active_defrag_key_hits:0
 active_defrag_key_misses:0
-
-# Replication
-role:master
-connected_slaves:0
-master_replid:0109335829ce22c0f27f90bd26ae0a69dad3cb35
-master_replid2:0000000000000000000000000000000000000000
-master_repl_offset:0
-second_repl_offset:-1
-repl_backlog_active:0
-repl_backlog_size:1048576
-repl_backlog_first_byte_offset:0
-repl_backlog_histlen:0
-
-# CPU
-used_cpu_sys:1.680000
-used_cpu_user:0.380000
-used_cpu_sys_children:0.000000
-used_cpu_user_children:0.000000
-
-# Cluster
-cluster_enabled:0
-
-# Keyspace
-db0:keys=5,expires=0,avg_ttl=0
 ```
 
-Note that the above method assumes you have redis-cli setup
+Note that the above method assumes you have `redis-cli` setup which is not a part of system requirements
 
 #### Admin and Metrics Endpoint
 - <http://localhost:8080/admin/> is admin dashboard for Webserver
@@ -256,6 +152,15 @@ make all
 ```
 This combines all the make tasks.
 
+### Test sending concurrent request
+[Work in progress]
+Class `com.amehta.proxy.redis.interact.test.RedisAppConcurrentRequestsTest` can be used send concurrent request to HTTP Webserver. The number of requests can be configured in `main()` method. 
+
+TODO: Figure out how to run a standalone from dropwizard based fat jar and use the command to dockerize this test.
+
+Currently, I can run this class in a native dev environment and see that concurrent requests are being handled. 
+
+
 ## Architecture
 TODO: Architecture Diagram
 1. GET endpoint
@@ -284,11 +189,12 @@ TODO: Elaborate on details above.
 ## Future Work
 ### Must
 - Allocate memory / cpu for Docker containers
-- Integration tests to send concurrent requests and assert response http code. Imitate `scripts/curl_test_concurrent.sh` for this
+- Test class `RedisAppConcurrentRequestsTest` to send concurrent requests and assert response http code needs to be run from fat jar and dockerize
+- Another bash based attempt `scripts/curl_test_concurrent.sh` needs to be Dockerized
 - Read `globalExpiry` from config in `RedisAppResourceIntegrationTest`
-- High Consistency when we are running only single redis container
 - Test to validate config. Such errors are showing up on runtime currently
 - Impose timeout on DB Read / Write calls
+- HTTP GET support for non-string value [data types](https://redis.io/topics/data-types)
 
 ### Good to have
 - Log cache hit / miss metrics periodically
@@ -306,6 +212,7 @@ TODO: Elaborate on details above.
 | Manual testing | 1 |
 | Tests + Refactoring | 1 |
 | Dockerize | 3 | #docker-newbie
-| Makefile | .5 |
+| Makefile | .5 | 
 | Documentation | 1 |
-|Re-iterating for code to match requirements | 1 |
+| Re-iterating for code to match requirements | 1 |
+| Concurrency test | .5 | Incomplete. Need to read up on Dropwizard on how to run a java class
