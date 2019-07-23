@@ -37,7 +37,6 @@ public class RedisApplication extends Application<RedisConfiguration> {
     public void run(RedisConfiguration configuration,
                     Environment environment) {
 
-        configuration.getThreadPoolSize();
         String redisAddress = configuration.getRedisAddress();
         int redisPort = configuration.getRedisPort();
         int jedisReadPoolSize = configuration.getJedisReadPoolSize();

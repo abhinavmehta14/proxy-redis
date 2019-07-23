@@ -66,22 +66,25 @@ public class RedisAppResource {
                     .entity(format("either key or value is null. key=%s, value=%s", key, value))
                     .build();
 
+        String response;
+        LOGGER.info(format("performing db write for key=%s, value=%s", key, value));
         try (Jedis resource = this.jedisWritePool.getResource()) {
-            String response = resource.set(key, value);
-            long dontCare = resource.expire(key, this.globalExpiry); // ignoring value for now; should add checks based on api contract
-            if ("OK".equals(response)) {
-                return Response
-                        .status(Response.Status.OK)
-                        .entity(format("key=%s, value=%s set successfully", key, value))
-                        .build();
-            } else {
-                return Response
-                        .status(Response.Status.INTERNAL_SERVER_ERROR)
-                        .entity(format("something went wrong while setting key=%s, value=%s. redis response=%s", key, value, response))
-                        .build();
-            }
+            response = resource.set(key, value);
+            long dontCare = resource.expire(key, this.globalExpiry); // ignoring value for now; TODO: add checks based on api contract
         }
+        cachedRedisService.invalidateCache(key);
 
+        if ("OK".equals(response)) {
+            return Response
+                    .status(Response.Status.OK)
+                    .entity(format("key=%s, value=%s set successfully", key, value))
+                    .build();
+        } else {
+            return Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(format("something went wrong while setting key=%s, value=%s. redis response=%s", key, value, response))
+                    .build();
+        }
     }
 
 }
