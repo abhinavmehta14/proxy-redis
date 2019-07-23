@@ -40,12 +40,14 @@ public class RedisApplication extends Application<RedisConfiguration> {
         configuration.getThreadPoolSize();
         String redisAddress = configuration.getRedisAddress();
         int redisPort = configuration.getRedisPort();
-        int jedisPoolSize = configuration.getJedisPoolSize();
+        int jedisReadPoolSize = configuration.getJedisReadPoolSize();
+        int jedisWritePoolSize = configuration.getJedisWritePoolSize();
         int cacheSize = configuration.getCacheSize();
         int cacheTimeout = configuration.getCacheTimeout();
         int cacheConcurrency = configuration.getCacheConcurrency();
+        int globalExpiry = configuration.getGlobalExpiry();
 
-        JedisPool jedisPool = getJedisPool(redisAddress, redisPort, jedisPoolSize);
+        JedisPool jedisPool = getJedisPool(redisAddress, redisPort, jedisReadPoolSize);
         // jedisPoolSize for writes to be setup and read from config file separately
         CachedRedisService cachedRedisService = new CachedRedisService(
                 jedisPool,
@@ -54,11 +56,12 @@ public class RedisApplication extends Application<RedisConfiguration> {
                 cacheConcurrency
         );
 
-        JedisPool jedisPoolForWrites = getJedisPool(redisAddress, redisPort, 4); // TODO: read pool size from config
+        JedisPool jedisWritePool = getJedisPool(redisAddress, redisPort, jedisWritePoolSize); // TODO: read pool size from config
 
         final RedisAppResource resource = new RedisAppResource(
                 cachedRedisService,
-                jedisPoolForWrites
+                jedisWritePool,
+                globalExpiry
         );
 
         final TemplateHealthCheck healthCheck =
