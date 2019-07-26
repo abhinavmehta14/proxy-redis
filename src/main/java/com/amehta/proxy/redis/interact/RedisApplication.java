@@ -1,5 +1,6 @@
 package com.amehta.proxy.redis.interact;
 
+import com.amehta.proxy.redis.JedisPoolManager;
 import com.amehta.proxy.redis.interact.health.TemplateHealthCheck;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
@@ -47,7 +48,7 @@ public class RedisApplication extends Application<RedisConfiguration> {
         int globalExpiry = configuration.getGlobalExpiry();
 
         JedisPool jedisPool = getJedisPool(redisAddress, redisPort, jedisReadPoolSize);
-        // jedisPoolSize for writes to be setup and read from config file separately
+        // TODO: Make this a Managed service
         CachedRedisService cachedRedisService = new CachedRedisService(
                 jedisPool,
                 cacheSize,
@@ -55,7 +56,8 @@ public class RedisApplication extends Application<RedisConfiguration> {
                 cacheConcurrency
         );
 
-        JedisPool jedisWritePool = getJedisPool(redisAddress, redisPort, jedisWritePoolSize); // TODO: read pool size from config
+        JedisPoolManager jedisPoolManager = new JedisPoolManager(redisAddress, redisPort, jedisWritePoolSize);
+        JedisPool jedisWritePool = jedisPoolManager.getJedisPool();
 
         final RedisAppResource resource = new RedisAppResource(
                 cachedRedisService,
@@ -66,6 +68,7 @@ public class RedisApplication extends Application<RedisConfiguration> {
         final TemplateHealthCheck healthCheck =
                 new TemplateHealthCheck();
 
+        environment.lifecycle().manage(jedisPoolManager);
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(resource);
     }

@@ -189,6 +189,7 @@ TODO: Elaborate on details above.
 ## Future Work
 ### Must
 - Allocate memory / cpu for Docker containers
+- For graceful shutdown, `CachedRedisService` should implement `io.dropwizard.lifecycle.Managed` interface
 - Test class `RedisAppConcurrentRequestsTest` to send concurrent requests and assert response http code needs to be run from fat jar and dockerize
 - Another bash based attempt `scripts/curl_test_concurrent.sh` needs to be Dockerized
 - Read `globalExpiry` from config in `RedisAppResourceIntegrationTest`
@@ -202,6 +203,16 @@ TODO: Elaborate on details above.
 - Run a Replica Redis container for failover to ensure High Availability
 - Cleanup POST endpoint which is a backdoor (since it is not a part of requirements) to add key value pairs to Redis
 
+
+## Benchmark
+- Million concurrent requests for different keys to the proxy
+TODO
+- Million concurrent requests for the same key to the proxy
+TODO
+
+Looks like Guava cache retrieval is slow at times taking upto 80ms
+
+ 
 ## Overall Effort
 
 | Task  | Hours | Notes |

@@ -37,7 +37,7 @@ public class RedisAppConcurrentRequestsTest {
      */
     private void testConcurrentRequests(int numRequests) throws ExecutionException, InterruptedException, TimeoutException {
         LOGGER.info(format("Running test to send %d concurrent requests to webserver", numRequests));
-        ExecutorService executorService = Executors.newCachedThreadPool();
+        ExecutorService executorService = Executors.newFixedThreadPool(8);
         List<Future<Integer>> futureCall = Lists.newArrayList();
         for (int i = 0; i < numRequests; i++) {
             futureCall.add(executorService.submit(() -> executeGet("http://127.0.0.1:8080/v1.0/proxy?key=a1")));
@@ -62,11 +62,13 @@ public class RedisAppConcurrentRequestsTest {
         }
 
         LOGGER.info(format("received valid response for all %d requests", numRequests));
+
+        executorService.shutdown();
     }
 
     public static void main(String[] args) throws ExecutionException, InterruptedException, TimeoutException {
         // OOM on 100,000 requests
-        new RedisAppConcurrentRequestsTest().testConcurrentRequests(500);
+        new RedisAppConcurrentRequestsTest().testConcurrentRequests(10000);
     }
 
 }
