@@ -3,6 +3,7 @@ package com.amehta.proxy.redis.interact;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -59,7 +60,13 @@ public class CachedRedisService {
     }
 
     public Optional<String> getValue(String key) throws ExecutionException {
-        return cache.get(key);
+        long stTime = DateTime.now().getMillis();
+        Optional<String> s = cache.get(key);
+        long endTime = DateTime.now().getMillis();
+        long tt = endTime - stTime;
+        if(tt > 10)
+            LOGGER.warn(format("slow cache.get tt=%d", endTime - stTime));
+        return s;
     }
 
     public void invalidateCache(String key) {

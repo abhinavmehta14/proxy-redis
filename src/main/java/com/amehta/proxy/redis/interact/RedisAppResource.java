@@ -44,6 +44,7 @@ public class RedisAppResource {
                     .entity("key is null")
                     .build();
 
+
         val = getValueFromCache(key);
 
         if (val == null)

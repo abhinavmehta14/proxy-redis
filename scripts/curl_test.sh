@@ -3,7 +3,7 @@
 # TODO: add keys a1, a2, a3 to redis
 # TODO: assert response codes from each of the curl requests below
 curl_code="curl -s -o /dev/null -XGET -w %{http_code}\t"
-for i in {0..100}
+for i in {0..30000}
 do
   echo -e "$i \c"
   ${curl_code} http://localhost:8080/v1.0/proxy/?key=a1
