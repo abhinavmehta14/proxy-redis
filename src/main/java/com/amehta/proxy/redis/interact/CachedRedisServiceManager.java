@@ -2,7 +2,9 @@ package com.amehta.proxy.redis.interact;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
+import com.google.common.cache.CacheStats;
 import com.google.common.cache.LoadingCache;
+import io.dropwizard.lifecycle.Managed;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,19 +13,24 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.String.format;
 
-public class CachedRedisService {
+public class CachedRedisServiceManager implements Managed {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachedRedisService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachedRedisServiceManager.class);
     private JedisPool jedisPool;
     private LoadingCache<String, Optional<String>> cache;
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private volatile CacheStats lastStats;
 
-    public CachedRedisService(JedisPool jedisPool, int cacheSize, int cacheTimeout, int cacheConcurrency) {
+    public CachedRedisServiceManager(JedisPool jedisPool, int cacheSize, int cacheTimeout, int cacheConcurrency) {
         this.jedisPool = jedisPool;
         this.cache = getCache(cacheSize, cacheTimeout, cacheConcurrency);
+        this.lastStats = cache.stats();
     }
 
     /* Initialize a guava cache with below params from config
@@ -50,6 +57,7 @@ public class CachedRedisService {
                 .concurrencyLevel(cacheConcurrency)
                 .maximumSize(cacheSize)
                 .expireAfterWrite(cacheTimeout, TimeUnit.SECONDS)
+                .recordStats()
                 .build(loader);
     }
 
@@ -72,5 +80,28 @@ public class CachedRedisService {
     public void invalidateCache(String key) {
         LOGGER.info(format("invalidating guava cache for key=%s", key));
         cache.invalidate(key);
+        LOGGER.info(format("invalidated guava cache for key=%s", key));
     }
+
+    @Override
+    public void stop() {
+        LOGGER.info("shutting down...");
+        scheduler.shutdown();
+        LOGGER.info("shutdown complete");
+    }
+
+    @Override
+    public void start() {
+        LOGGER.info("starting...");
+        this.scheduler.scheduleAtFixedRate(() -> {
+            try {
+                final CacheStats oldStats = lastStats;
+                lastStats = cache.stats();
+                LOGGER.info("cache stats {}", lastStats.minus(oldStats));
+            } catch (Exception e) {
+                LOGGER.error("Could not get {} stats", e);
+            }}, 1, 1, TimeUnit.MINUTES);
+        LOGGER.info("started");
+    }
+
 }

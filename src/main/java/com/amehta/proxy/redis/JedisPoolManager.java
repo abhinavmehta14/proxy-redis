@@ -30,15 +30,18 @@ public class JedisPoolManager implements Managed {
 
     @Override
     public void start() {
+        LOGGER.info("starting...");
         GenericObjectPoolConfig config = new GenericObjectPoolConfig();
         config.setMaxTotal(this.jedisPoolSize);
         this.jedisPool = new JedisPool(config, this.redisAddress, this.redisPort);
+        LOGGER.info("started");
     }
 
     @Override
     public void stop() {
-        LOGGER.info("shutting down jedis pool gracefully");
+        LOGGER.info("shutting down");
         this.jedisPool.close();
+        LOGGER.info("shut down");
     }
 
     public JedisPool getJedisPool() {
