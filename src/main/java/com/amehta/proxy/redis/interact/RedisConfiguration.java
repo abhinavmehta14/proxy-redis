@@ -32,9 +32,6 @@ public class RedisConfiguration extends Configuration {
     @NotNull
     private Integer jedisWritePoolSize;
 
-    @NotNull
-    private Integer threadPoolSize;
-
     @JsonProperty
     public int getCacheSize() {
         return this.cacheSize;
@@ -72,12 +69,7 @@ public class RedisConfiguration extends Configuration {
 
     @JsonProperty
     public int getJedisWritePoolSize() {
-        return this.jedisReadPoolSize;
-    }
-
-    @JsonProperty
-    public int getThreadPoolSize() {
-        return this.threadPoolSize;
+        return this.jedisWritePoolSize;
     }
 
     // TODO: setters - might be useful with tests

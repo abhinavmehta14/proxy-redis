@@ -1,5 +1,4 @@
 # Proxy Redis Service
-
 This service is to interact with a [Redis](https://redis.io/) Datastore via HTTP. Setup is meant to be scalable and handle concurrent requests. Service uses the below building blocks,
  - Webserver is based on [Dropwizard](https://www.dropwizard.io/1.0.0/docs/getting-started.html), a Java framework for developing RESTful web apps
  - Exposes a HTTP GET endpoint to perform read operations from Redis
@@ -11,6 +10,19 @@ System in it's current form offers,
 2. Not Highly Available (HA)
 
 HA can be offered with current setup with minor changes.
+
+## Assumptions and Design Choice
+A software application typically desires one of the below two properties based on the use case and live with a slight compromise on the other
+1. *High Consistency*
+2. *High Availability*
+
+In a realistic Data Center where nodes can be down for arbitrary time and *Network Partitions* are common it is impossible to achieve both consistency and availability. Based on the use case we prefer one over the other to fit the requirements.
+
+Data consistency is important for systems hosting transactional data. Non-transactional data (typically) demands less on consistency i.e small fraction of data loss is acceptable if that helps with High Availability so that it is available for huge throughput of writes e.g. a case of clickstream in a typical e-commerce website.
+
+This setup establishes a foundation towards high availability while compromising on consistency. Redis can be setup for asynchronous replication. In case a Redis host goes down, replica can take over to serve as a replacement. Only gotcha is it may not have all the data. Such fault tolerance offers high availability at the cost of data consistency.
+
+Currently, Redis is running as a single node. TODO: Setup Redis slave and turn on replication mechanism for high availability.
 
 ## Development - Running Proxy Service
 ### Prerequisites
@@ -188,20 +200,62 @@ TODO: Elaborate on details above.
 
 ## Future Work
 ### Must
-- Allocate memory / cpu for Docker containers
-- Test class `RedisAppConcurrentRequestsTest` to send concurrent requests and assert response http code needs to be run from fat jar and dockerize
-- Another bash based attempt `scripts/curl_test_concurrent.sh` needs to be Dockerized
+- Allocate memory limit for Redis and cpu limits for Redis and Proxy containers
+- ~~For graceful shutdown, `CachedRedisService` should implement `io.dropwizard.lifecycle.Managed` interface~~
+- Address problems with concurrency test class `ProxyLoadTestCommand` to send concurrent requests and assert response http code. ~~Dockerize and run from fat jar~~
+- ~~Another bash based attempt `scripts/curl_test_concurrent.sh` needs to be Dockerized~~ Not Applicable
 - Read `globalExpiry` from config in `RedisAppResourceIntegrationTest`
-- Test to validate config. Such errors are showing up on runtime currently
+- ~~Test to validate config. Such errors are showing up on runtime currently~~ Command `java -jar FAT_JAR` addresses this 
 - Impose timeout on DB Read / Write calls
 - HTTP GET support for non-string value [data types](https://redis.io/topics/data-types)
 
 ### Good to have
-- Log cache hit / miss metrics periodically
+- ~~Log cache hit / miss metrics periodically~~
 - Sharding (Run N redis containers and shard based on key range)
 - Run a Replica Redis container for failover to ensure High Availability
 - Cleanup POST endpoint which is a backdoor (since it is not a part of requirements) to add key value pairs to Redis
 
+
+## Benchmark
+Benchmarks below are done using [Apache HTTP server benchmarking tool](https://httpd.apache.org/docs/2.4/programs/ab.html) for GET endpoint hosted by single replica of Proxy Service. Command to run benchmark,
+```shell
+make benchmark_ab
+```
+
+Various parameters (`concurrency_level`, `concurrency_level`, `keep_alive`) are controlled from within the `Makefile`
+
+Results,
+
+| Special conditions | #Keys queried | #Requests | Concurrency | mean | t50 | t75 | t95 | t99 | t100 | Non-2xx responses | Requests per second | response body size (bytes) |
+| --- | ------------- | --------- | ----------- | ---- | --- | --- | --- | --- | ---- | --- | --- | --- |
+| no connection keep alive | 1 | 100,000 | 10 | 34 | 26 | 32 | 46 | 208 | 1259 | - | - | 13
+| no connection keep alive | 1 | 100,000 | 32 | 113 | 87 | 107 | 275 | 540 | 4853 | - | - | 13
+| **with connection keep alive** | 1 | 1000,000 | 32 | 3 | 0 | 1 | 14| 65 | 400 | 100 |  640 | 13 
+
+Note that, `t{xx}` is in milliseconds
+
+TODO: Improve benchmarking capabilities for multiple url using JMeter (`docker pull justb4/jmeter`)
+
+
+## Benchmark (work in progress)
+This benchmark uses `ProxyLoadTestCommand` class, a command line utility for advanced assertions on load test like response code, body
+TODOs:
+ 1. setup stdout logs from benchmark not appearing on console
+ 2. Investigate `NoRouteToHost` exception
+
+Benchmark can be invoked with the command below,
+```
+make benchmark
+```
+
+To connect to running benchmark container
+```shell
+docker-compose ps # To get service name for benchmark e.g. proxy-redis_benchmark_run_3
+docker exec -it proxy-redis_benchmark_run_[%s] bash # use suffix from the output of the command above
+```
+
+
+ 
 ## Overall Effort
 
 | Task  | Hours | Notes |

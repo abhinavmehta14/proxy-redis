@@ -7,18 +7,30 @@ services:
     ports:
       - "7001:6379"
     networks:
-      - redis
+      - proxynet
 
   proxy-redis:
     image: proxy-redis:1.0
     container_name: proxy
-    command: java -jar proxy-redis-1.0-SNAPSHOT.jar server redis-app.yml
+    command: java -Xmx2g -Xms2g -jar proxy-redis-1.0-SNAPSHOT.jar server redis-app.yml
     ports:
       - "8080:8080"
     networks:
-      - redis
+      - proxynet
     depends_on:
       - redis
+
+  benchmark: # work in progress, refer TODOs for it in README
+    image: proxy-redis:1.0
+    container_name: benchmark
+    command: java -Xmx1g -Xms1g -jar proxy-redis-1.0-SNAPSHOT.jar proxy-load-test -n 100000 -c 8
+    networks:
+      - proxynet
+
+  benchmark_ab:
+    image: jordi/ab
+    networks:
+      - proxynet
 
   proxy-build:
     image: proxy-redis:1.0
@@ -36,7 +48,7 @@ services:
     command: mvn package # use -DskipTests=true here if there is genuie reason to skip tests
     container_name: proxy-test
     networks:
-      - redis
+      - proxynet
     volumes:
       # Below is to speed up maven build on a re-run
       - ~/.m2:/root/.m2
@@ -47,4 +59,4 @@ services:
       - redis
 
 networks:
-  redis:
+  proxynet:

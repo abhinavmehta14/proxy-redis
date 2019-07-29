@@ -18,7 +18,7 @@ import static org.junit.Assert.assertEquals;
 
 public class RedisAppResourceIntegrationTest {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(CachedRedisServiceTest.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(CachedRedisServiceManagerTest.class);
 
     private RedisAppResource resource;
     private JedisPool pool;
@@ -37,8 +37,8 @@ public class RedisAppResourceIntegrationTest {
          redisPort = 7001;
         */
         pool = new JedisPool(redisAddress, redisPort);
-        CachedRedisService cachedRedisService = new CachedRedisService(pool, 2, 1, 1);
-        resource = new RedisAppResource(cachedRedisService, null, 3600);
+        CachedRedisServiceManager cachedRedisServiceManager = new CachedRedisServiceManager(pool, 2, 1, 1);
+        resource = new RedisAppResource(cachedRedisServiceManager, null, 3600);
         pool = new JedisPool(redisAddress, redisPort);
         try (Jedis resource = pool.getResource()) {
             resource.set("k1", "v1"); // TODO: set an expiry s.t. this disappers after tests run
