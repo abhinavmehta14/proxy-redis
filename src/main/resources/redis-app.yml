@@ -27,7 +27,6 @@ redisPort: 6379
 redisAddress: redis-db
 cacheSize: 1024
 cacheTimeout: 600 # in seconds
-threadPoolSize: 32
 jedisReadPoolSize: 32 # pool size for reads, proportional to threadPoolSize
 jedisWritePoolSize: 4
 cacheConcurrency: 32 # decides number segments in Guava cache to help with contention
