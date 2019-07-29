@@ -2,6 +2,7 @@ package com.amehta.proxy.redis.interact;
 
 import com.amehta.proxy.redis.JedisPoolManager;
 import com.amehta.proxy.redis.interact.health.TemplateHealthCheck;
+import com.amehta.proxy.redis.interact.test.ProxyLoadTestCommand;
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -11,12 +12,12 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
 
 
-public class RedisApplication extends Application<RedisConfiguration> {
+public class ProxyApplication extends Application<RedisConfiguration> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisApplication.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProxyApplication.class);
 
     public static void main(String[] args) throws Exception {
-        new RedisApplication().run(args);
+        new ProxyApplication().run(args);
     }
 
     @Override
@@ -26,6 +27,7 @@ public class RedisApplication extends Application<RedisConfiguration> {
 
     @Override
     public void initialize(Bootstrap<RedisConfiguration> bootstrap) {
+        bootstrap.addCommand(new ProxyLoadTestCommand());
     }
 
     private JedisPool getJedisPool(String redisAddress, int redisPort, int jedisPoolSize) {
@@ -49,7 +51,7 @@ public class RedisApplication extends Application<RedisConfiguration> {
 
         JedisPool jedisPool = getJedisPool(redisAddress, redisPort, jedisReadPoolSize);
         // TODO: Make this a Managed service
-        CachedRedisService cachedRedisService = new CachedRedisService(
+        CachedRedisServiceManager cachedRedisServiceManager = new CachedRedisServiceManager(
                 jedisPool,
                 cacheSize,
                 cacheTimeout,
@@ -60,7 +62,7 @@ public class RedisApplication extends Application<RedisConfiguration> {
         JedisPool jedisWritePool = jedisPoolManager.getJedisPool();
 
         final RedisAppResource resource = new RedisAppResource(
-                cachedRedisService,
+                cachedRedisServiceManager,
                 jedisWritePool,
                 globalExpiry
         );
@@ -68,7 +70,10 @@ public class RedisApplication extends Application<RedisConfiguration> {
         final TemplateHealthCheck healthCheck =
                 new TemplateHealthCheck();
 
+        LOGGER.info("registering managed objects");
         environment.lifecycle().manage(jedisPoolManager);
+        environment.lifecycle().manage(cachedRedisServiceManager);
+        LOGGER.info("registered managed objects");
         environment.healthChecks().register("template", healthCheck);
         environment.jersey().register(resource);
     }

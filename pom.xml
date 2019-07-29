@@ -20,7 +20,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <dropwizard.version>1.0.0</dropwizard.version>
-        <mainClass>com.amehta.proxy.redis.interact.RedisApplication</mainClass>
+        <mainClass>com.amehta.proxy.redis.interact.ProxyApplication</mainClass>
     </properties>
 
     <dependencyManagement>

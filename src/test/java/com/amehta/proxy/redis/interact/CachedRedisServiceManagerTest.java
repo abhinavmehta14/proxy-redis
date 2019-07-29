@@ -16,11 +16,11 @@ import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
-public class CachedRedisServiceTest {
+public class CachedRedisServiceManagerTest {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(CachedRedisServiceTest.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(CachedRedisServiceManagerTest.class);
     private static int cacheTimeout = 5;
-    private CachedRedisService cachedRedisService;
+    private CachedRedisServiceManager cachedRedisServiceManager;
     private JedisPool jedisPool = mock(JedisPool.class);
     private Jedis jedis = mock(Jedis.class);
     private ImmutablePair<String, String> kv1 = ImmutablePair.of("k1", "v1");
@@ -34,7 +34,7 @@ public class CachedRedisServiceTest {
                 .thenReturn(kv1.getValue());
         when(jedis.get(kv2.getKey()))
                 .thenReturn(kv2.getValue());
-        cachedRedisService = new CachedRedisService(jedisPool,
+        cachedRedisServiceManager = new CachedRedisServiceManager(jedisPool,
                 1,
                 cacheTimeout,
                 1);
@@ -47,15 +47,15 @@ public class CachedRedisServiceTest {
 
     @Test
     public void testCacheMissFlow() throws ExecutionException {
-        Optional<String> value = cachedRedisService.getValue(kv1.getKey());
+        Optional<String> value = cachedRedisServiceManager.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), value.get());
         verify(jedis, times(1)).get(kv1.getKey());
     }
 
     @Test
     public void testCacheHitFlow() throws ExecutionException {
-        Optional<String> value = cachedRedisService.getValue(kv1.getKey());
-        Optional<String> valueAgain = cachedRedisService.getValue(kv1.getKey());
+        Optional<String> value = cachedRedisServiceManager.getValue(kv1.getKey());
+        Optional<String> valueAgain = cachedRedisServiceManager.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), value.get());
         assertEquals(kv1.getValue(), valueAgain.get());
         verify(jedis, times(1)).get(kv1.getKey());
@@ -64,9 +64,9 @@ public class CachedRedisServiceTest {
     @Test
     public void testCacheLRUPropertySize() throws ExecutionException {
         // cacheSize is set to 1
-        Optional<String> v1 = cachedRedisService.getValue(kv1.getKey());
-        Optional<String> v2 = cachedRedisService.getValue(kv2.getKey());
-        Optional<String> v1Again = cachedRedisService.getValue(kv1.getKey());
+        Optional<String> v1 = cachedRedisServiceManager.getValue(kv1.getKey());
+        Optional<String> v2 = cachedRedisServiceManager.getValue(kv2.getKey());
+        Optional<String> v1Again = cachedRedisServiceManager.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
         assertEquals(kv2.getValue(), v2.get());
         assertEquals(kv1.getValue(), v1Again.get());
@@ -77,12 +77,12 @@ public class CachedRedisServiceTest {
     @Test
     public void testCacheLRUPropertyTimeout() throws ExecutionException, InterruptedException {
         // sleep for more than cacheTimeout
-        Optional<String> v1 = cachedRedisService.getValue(kv1.getKey());
+        Optional<String> v1 = cachedRedisServiceManager.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
         int sleepTime = cacheTimeout + 2;
         LOGGER.info(format("About to sleep for %d seconds to test cache timeout", sleepTime));
         Thread.sleep(sleepTime * 1000L);
-        Optional<String> v1Again = cachedRedisService.getValue(kv1.getKey());
+        Optional<String> v1Again = cachedRedisServiceManager.getValue(kv1.getKey());
         assertEquals(kv1.getValue(), v1.get());
         assertEquals(kv1.getValue(), v1Again.get());
         verify(jedis, times(2)).get(kv1.getKey());

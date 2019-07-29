@@ -20,18 +20,18 @@ public class RedisAppResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisAppResource.class);
 
-    private CachedRedisService cachedRedisService;
+    private CachedRedisServiceManager cachedRedisServiceManager;
     private JedisPool jedisWritePool;
     private int globalExpiry;
 
-    public RedisAppResource(CachedRedisService cachedRedisService, JedisPool jedisWritePool, int globalExpiry) {
-        this.cachedRedisService = cachedRedisService;
+    public RedisAppResource(CachedRedisServiceManager cachedRedisServiceManager, JedisPool jedisWritePool, int globalExpiry) {
+        this.cachedRedisServiceManager = cachedRedisServiceManager;
         this.jedisWritePool = jedisWritePool;
         this.globalExpiry = globalExpiry;
     }
 
     private String getValueFromCache(String key) throws ExecutionException {
-        return cachedRedisService.getValue(key).orElse(null);
+        return cachedRedisServiceManager.getValue(key).orElse(null);
     }
 
     @GET
@@ -73,7 +73,7 @@ public class RedisAppResource {
             response = resource.set(key, value);
             long dontCare = resource.expire(key, this.globalExpiry); // ignoring value for now; TODO: add checks based on api contract
         }
-        cachedRedisService.invalidateCache(key);
+        cachedRedisServiceManager.invalidateCache(key);
 
         if ("OK".equals(response)) {
             return Response
