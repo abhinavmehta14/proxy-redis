@@ -1,3 +1,6 @@
+default:
+	# no task specified. exit, do nothing
+	exit 1
 run:
 	# Maintaining a separate file since it has several useful instructions / debugging hacks
 	docker-compose stop proxy-redis
