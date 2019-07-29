@@ -1,5 +1,4 @@
 # Proxy Redis Service
-
 This service is to interact with a [Redis](https://redis.io/) Datastore via HTTP. Setup is meant to be scalable and handle concurrent requests. Service uses the below building blocks,
  - Webserver is based on [Dropwizard](https://www.dropwizard.io/1.0.0/docs/getting-started.html), a Java framework for developing RESTful web apps
  - Exposes a HTTP GET endpoint to perform read operations from Redis
@@ -11,6 +10,19 @@ System in it's current form offers,
 2. Not Highly Available (HA)
 
 HA can be offered with current setup with minor changes.
+
+## Assumptions and Design Choice
+A software application typically desires one of the below two properties based on the use case and live with a slight compromise on the other
+1. *High Consistency*
+2. *High Availability*
+
+In a realistic Data Center where nodes can be down for arbitrary time and *Network Partitions* are common it is impossible to achieve both consistency and availability. Based on the use case we prefer one over the other to fit the requirements.
+
+Data consistency is important for systems hosting transactional data. Non-transactional data (typically) demands less on consistency i.e small fraction of data loss is acceptable if that helps with High Availability so that it is available for huge throughput of writes e.g. a case of clickstream in a typical e-commerce website.
+
+This setup establishes a foundation towards high availability while compromising on consistency. Redis can be setup for asynchronous replication. In case a Redis host goes down, replica can take over to serve as a replacement. Only gotcha is it may not have all the data. Such fault tolerance offers high availability at the cost of data consistency.
+
+Currently, Redis is running as a single node. TODO: Setup Redis slave and turn on replication mechanism for high availability.
 
 ## Development - Running Proxy Service
 ### Prerequisites

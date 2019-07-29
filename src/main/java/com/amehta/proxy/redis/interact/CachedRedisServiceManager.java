@@ -84,13 +84,6 @@ public class CachedRedisServiceManager implements Managed {
     }
 
     @Override
-    public void stop() {
-        LOGGER.info("shutting down...");
-        scheduler.shutdown();
-        LOGGER.info("shutdown complete");
-    }
-
-    @Override
     public void start() {
         LOGGER.info("starting...");
         this.scheduler.scheduleAtFixedRate(() -> {
@@ -102,6 +95,14 @@ public class CachedRedisServiceManager implements Managed {
                 LOGGER.error("Could not get {} stats", e);
             }}, 1, 1, TimeUnit.MINUTES);
         LOGGER.info("started");
+    }
+
+
+    @Override
+    public void stop() {
+        LOGGER.info("shutting down...");
+        scheduler.shutdown();
+        LOGGER.info("shutdown complete");
     }
 
 }
