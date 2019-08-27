@@ -253,20 +253,3 @@ To connect to running benchmark container
 docker-compose ps # To get service name for benchmark e.g. proxy-redis_benchmark_run_3
 docker exec -it proxy-redis_benchmark_run_[%s] bash # use suffix from the output of the command above
 ```
-
-
- 
-## Overall Effort
-
-| Task  | Hours | Notes |
-| ----------- | :-----------: | :--- |
-| Understanding Requirements | 1 |
-| Setting up a Dropwizard webserver  | 1.5  |
-| Code  | .5  |
-| Manual testing | 1 |
-| Tests + Refactoring | 1 |
-| Dockerize | 3 | #docker-newbie
-| Makefile | .5 | 
-| Documentation | 1 |
-| Re-iterating for code to match requirements | 1 |
-| Concurrency test | .5 | Incomplete. Need to read up on Dropwizard on how to run a java class
