@@ -1,15 +1,13 @@
-# Proxy Redis Service
-This service is to interact with a [Redis](https://redis.io/) Datastore via HTTP. Setup is meant to be scalable and handle concurrent requests. Service uses the below building blocks,
+# Proxy Service
+This service interacts with a [Redis](https://redis.io/) Datastore via HTTP. Setup is meant to be scalable and handle concurrent requests. Service uses the below building blocks,
  - Webserver is based on [Dropwizard](https://www.dropwizard.io/1.0.0/docs/getting-started.html), a Java framework for developing RESTful web apps
  - Exposes a HTTP GET endpoint to perform read operations from Redis
  - Exposes a HTTP POST endpoint, a backdoor to perform write operation to Redis
  - Caches `<key,value>` pairs into a [Guava](https://github.com/google/guava/wiki) based LRU cache
 
-System in it's current form offers,
-1. Eventual Consistency
-2. Not Highly Available (HA)
-
-HA can be offered with current setup with minor changes.
+System in it's current form,
+1. Achieves eventual Consistency
+2. Is not Highly Available (HA). HA can be achieved with minor changes to this setup though
 
 ## Assumptions and Design Choice
 A software application typically desires one of the below two properties based on the use case and live with a slight compromise on the other
